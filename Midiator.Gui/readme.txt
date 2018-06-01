@@ -1,0 +1,1 @@
+﻿Link do ikony: https://www.iconfinder.com/icons/1807/midi_mix_icon Licencja: LGPL
