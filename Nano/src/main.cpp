@@ -30,13 +30,13 @@ bool x = false;
 // uncomment "OUTPUT_READABLE_ACCELGYRO" if you want to see a tab-separated
 // list of the accel X/Y/Z and then gyro X/Y/Z values in decimal. Easy to read,
 // not so easy to parse, and slow(er) over UART.
-#define OUTPUT_READABLE_ACCELGYRO
+//#define OUTPUT_READABLE_ACCELGYRO
 
 // uncomment "OUTPUT_BINARY_ACCELGYRO" to send all 6 axes of data as 16-bit
 // binary, one right after the other. This is very fast (as fast as possible
 // without compression or data loss), and easy to parse, but impossible to read
 // for a human.
-//#define OUTPUT_BINARY_ACCELGYRO
+#define OUTPUT_BINARY_ACCELGYRO
 
 
 #define LED_PIN LED_BUILTIN
@@ -122,10 +122,10 @@ void loop() {
     // these methods (and a few others) are also available
     //accelgyro.getAcceleration(&ax, &ay, &az);
     //accelgyro.getRotation(&gx, &gy, &gz);
-    char text[128] = {0};
-    sprintf(text, "a/g:\t%d\t%d\t%d\t%d\t%d\t%d\t", ax, ay, az, gx, gy, gz);
-    radio.write(&text, sizeof(text));
     #ifdef OUTPUT_READABLE_ACCELGYRO
+        char text[128] = {0};
+        sprintf(text, "a/g:\t%d\t%d\t%d\t%d\t%d\t%d\t", ax, ay, az, gx, gy, gz);
+        radio.write(&text, sizeof(text));
         // display tab-separated accel/gyro x/y/z values
         Serial.print("a/g:\t");
         Serial.print(ax); Serial.print("\t");
@@ -135,14 +135,15 @@ void loop() {
         Serial.print(gy); Serial.print("\t");
         Serial.println(gz);
     #endif
-
     #ifdef OUTPUT_BINARY_ACCELGYRO
-        Serial.write((uint8_t)(ax >> 8)); Serial.write((uint8_t)(ax & 0xFF));
-        Serial.write((uint8_t)(ay >> 8)); Serial.write((uint8_t)(ay & 0xFF));
-        Serial.write((uint8_t)(az >> 8)); Serial.write((uint8_t)(az & 0xFF));
-        Serial.write((uint8_t)(gx >> 8)); Serial.write((uint8_t)(gx & 0xFF));
-        Serial.write((uint8_t)(gy >> 8)); Serial.write((uint8_t)(gy & 0xFF));
-        Serial.write((uint8_t)(gz >> 8)); Serial.write((uint8_t)(gz & 0xFF));
+        uint16_t buffer[6] = {0};
+        buffer[0] = ax;
+        buffer[1] = ay;
+        buffer[2] = az;
+        buffer[3] = gx;
+        buffer[4] = gy;
+        buffer[5] = gz;
+        radio.write(buffer, sizeof(buffer)*2);
     #endif
 
     // blink LED to indicate activity

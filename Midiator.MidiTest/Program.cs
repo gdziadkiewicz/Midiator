@@ -32,28 +32,18 @@ namespace Midiator.MidiTest
                 _midiSender.Dispose();
             }
         }
+
         private static void OnNext(EventPattern<SerialDataReceivedEventArgs> x)
         {
-            var line = ((SerialPort) x.Sender).ReadLine();
+            var buffer = new byte[12];
+            ((SerialPort) x.Sender).Read(buffer,0,12);
             int ax, ay, az, gx, gy, gz;
-            try
-            {
-                var matchCollection = line.Split('\t').Skip(1).ToList();
-                ax = Int32.Parse(matchCollection[0]);
-                ay = Int32.Parse(matchCollection[1]);
-                az = Int32.Parse(matchCollection[2]);
-                gx = Int32.Parse(matchCollection[3]);
-                gy = Int32.Parse(matchCollection[4]);
-                gz = Int32.Parse(matchCollection[5]);
-            }
-            catch
-            {
-                return;
-            }
-            finally
-            {
-                Console.WriteLine(line);
-            }
+            ax = BitConverter.ToInt16(buffer, 0);
+            ay = BitConverter.ToInt16(buffer, 2);
+            az = BitConverter.ToInt16(buffer, 4);
+            gx = BitConverter.ToInt16(buffer, 6);
+            gy = BitConverter.ToInt16(buffer, 8);
+            gz = BitConverter.ToInt16(buffer, 10);
 
             int limitedValue = ay <= _minVal? 0: ay>=MaxVal? MaxVal: ay-_minVal;
             double d = limitedValue / (double)MaxVal;
